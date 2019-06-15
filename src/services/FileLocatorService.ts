@@ -14,7 +14,20 @@ export module FileLocatorService {
   export function getTestFile(uri: vscode.Uri) {
     const { path } = uri;
     const root = rootDirectory().uri.path;
-    const testFilePath = root + '/test' + path.replace(root, '');
+
+    const testFilePathFilter = /(\/app)/;
+    const extensionPattern: RegExp = /\.([^\.]+)$/;
+
+    const testFilePath =
+      root +
+      '/test' +
+      path
+        .replace(root, '')
+        .replace(testFilePathFilter, '')
+        .replace(
+          extensionPattern,
+          ConfigService.TestFileExtensionReplacement.value,
+        );
 
     return vscode.Uri.file(testFilePath);
   }

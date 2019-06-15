@@ -28,6 +28,11 @@
           "type": "string",
           "default": "**",
           "description": "Pattern for files that should have tests scaffolded."
+        },
+        "qassistant.testFileExtensionReplacement": {
+          "type": "string",
+          "default": "_test.$1",
+          "description": "Pattern to replace file extension with when creating test file. (Use $1 for tested file's extension)"
         }
       }
     }
@@ -45,5 +50,9 @@
     "tslint": "^5.12.1",
     "@types/node": "^10.12.21",
     "@types/mocha": "^2.2.42"
+  },
+  "dependencies": {
+    "@types/mkdirp": "^0.5.2",
+    "mkdirp": "^0.5.1"
   }
 }

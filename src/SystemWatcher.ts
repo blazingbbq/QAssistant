@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
-import { FileLocatorService, TemplateService, ConfigService } from './services';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as mkdirp from 'mkdirp';
+import { FileLocatorService, TemplateService, ConfigService } from './services';
 
 enum OVERWRITE {
   APPROVE = 'Overwrite',
@@ -28,9 +30,9 @@ function newFileSystemWatcher() {
 
 function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
   fileSystemWatcher.onDidCreate(event => {
-    const filePath = FileLocatorService.getTestFile(event).path;
+    if (fs.lstatSync(event.path).isDirectory()) { return; }
 
-    console.log(filePath);
+    const filePath = FileLocatorService.getTestFile(event).path;
 
     if (fs.existsSync(filePath)) {
       vscode.window
@@ -62,10 +64,19 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
 }
 
 function createTestFile(filePath: string) {
-  var content = TemplateService.newFile(filePath);
-  fs.writeFileSync(filePath, content, 'utf8');
+  const content = TemplateService.newFile(filePath);
+  const dirName = path.dirname(filePath);
 
-  vscode.workspace.openTextDocument(filePath).then(doc => {
-    vscode.window.showTextDocument(doc);
+  mkdirp(dirName, err => {
+    if (err) {
+      throw err;
+    }
+
+    fs.promises.writeFile(filePath, content).then(() => {
+      // TODO: Do not open test file on creation
+      vscode.workspace.openTextDocument(filePath).then(doc => {
+        vscode.window.showTextDocument(doc);
+      });
+    });
   });
 }

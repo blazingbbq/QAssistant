@@ -3,36 +3,33 @@ import * as vscode from 'vscode';
 export module ConfigService {
   var config = vscode.workspace.getConfiguration('qassistant');
 
-  // export function fileToTestPattern(): string {
-  //   return getConfigSetting('fileToTestPattern');
-  // }
-  export class FileToTestPattern {
-    static CONFIG_NAME = 'fileToTestPattern';
+  abstract class ConfigSetting {
+    protected static CONFIG_NAME: string;
 
     static get value() {
-      return getConfigSetting(this.CONFIG_NAME);
+      const setting = config.get(this.CONFIG_NAME);
+      if (!setting) {
+        throw new Error('Could not find "' + this.CONFIG_NAME + '" config.');
+      }
+
+      return <string>setting;
     }
 
     static onChange(callback: () => void) {
-      registerConfigChangeListener(this.CONFIG_NAME, callback);
+      vscode.workspace.onDidChangeConfiguration(event => {
+        if (event.affectsConfiguration('qassistant.' + this.CONFIG_NAME)) {
+          config = vscode.workspace.getConfiguration('qassistant');
+          callback();
+        }
+      });
     }
   }
 
-  function getConfigSetting(name: string) {
-    const setting = config.get('fileToTestPattern');
-    if (!setting) {
-      throw new Error('Could not find "' + name + '" config.');
-    }
-
-    return <string>setting;
+  export class FileToTestPattern extends ConfigSetting {
+    static CONFIG_NAME = 'fileToTestPattern';
   }
 
-  function registerConfigChangeListener(name: string, callback: () => void) {
-    vscode.workspace.onDidChangeConfiguration(event => {
-      if (event.affectsConfiguration('qassistant.' + name)) {
-        config = vscode.workspace.getConfiguration('qassistant');
-        callback();
-      }
-    });
+  export class TestFileExtensionReplacement extends ConfigSetting {
+    static CONFIG_NAME = 'testFileExtensionReplacement';
   }
 }
