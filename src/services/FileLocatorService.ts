@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
+import { ConfigService } from '../services';
 
 export module FileLocatorService {
   export function getWatchDirectory() {
-    // Else watch entire workspace
     const root = rootDirectory();
 
-    // TODO: Setup custom watch directory
-    // TODO: Setup file types to watch...
-    return new vscode.RelativePattern(root, '**/*.*');
+    return new vscode.RelativePattern(
+      root,
+      ConfigService.FileToTestPattern.value,
+    );
   }
 
   export function getTestFile(uri: vscode.Uri) {

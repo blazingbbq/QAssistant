@@ -19,7 +19,18 @@
         "command": "qassistant.scaffoldTests",
         "title": "Scaffold Tests"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "QAssistant configuration",
+      "properties": {
+        "qassistant.fileToTestPattern": {
+          "type": "string",
+          "default": "**",
+          "description": "Pattern for files that should have tests scaffolded."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
