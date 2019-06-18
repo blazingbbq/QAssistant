@@ -15,19 +15,26 @@ export module FileLocatorService {
     const { path } = uri;
     const root = rootDirectory().uri.path;
 
-    const testFilePathFilter = /(\/app)/;
     const extensionPattern: RegExp = /\.([^\.]+)$/;
 
-    const testFilePath =
+    var testFilePath =
       root +
-      '/test' +
-      path
-        .replace(root, '')
-        .replace(testFilePathFilter, '')
-        .replace(
-          extensionPattern,
-          ConfigService.TestFileExtensionReplacement.value,
-        );
+      replaceOrInsertAt<string>(
+        path
+          .replace(root, '')
+          .replace(
+            extensionPattern,
+            ConfigService.TestFileExtensionReplacement.value,
+          )
+          .split('/'),
+        ConfigService.TestFileLocation.value ===
+          ConfigService.TestFileLocation.EXPLORER_VALUES.PARALLEL
+          ? 1
+          : -1,
+        'test',
+      ).join('/');
+
+    console.log(testFilePath);
 
     return vscode.Uri.file(testFilePath);
   }
@@ -40,4 +47,16 @@ export module FileLocatorService {
     }
     return workspaceFolders[0];
   }
+}
+
+function replaceOrInsertAt<T>(arr: T[], index: number, value: T) {
+  var temp = arr;
+
+  if (index >= 0) {
+    temp[index] = value;
+  } else {
+    temp.splice(index, 0, value);
+  }
+
+  return temp;
 }

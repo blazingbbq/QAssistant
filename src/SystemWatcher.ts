@@ -30,7 +30,12 @@ function newFileSystemWatcher() {
 
 function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
   fileSystemWatcher.onDidCreate(event => {
-    if (fs.lstatSync(event.path).isDirectory()) { return; }
+    if (
+      fs.lstatSync(event.path).isDirectory() ||
+      event.fsPath.includes('/test/')
+    ) {
+      return;
+    }
 
     const filePath = FileLocatorService.getTestFile(event).path;
 
@@ -73,10 +78,11 @@ function createTestFile(filePath: string) {
     }
 
     fs.promises.writeFile(filePath, content).then(() => {
-      // TODO: Do not open test file on creation
-      vscode.workspace.openTextDocument(filePath).then(doc => {
-        vscode.window.showTextDocument(doc);
-      });
+      if (ConfigService.OpenTestFileOnCreation.value) {
+        vscode.workspace.openTextDocument(filePath).then(doc => {
+          vscode.window.showTextDocument(doc);
+        });
+      }
     });
   });
 }

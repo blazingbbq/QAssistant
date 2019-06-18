@@ -26,13 +26,27 @@
       "properties": {
         "qassistant.fileToTestPattern": {
           "type": "string",
-          "default": "**",
-          "description": "Pattern for files that should have tests scaffolded."
+          "default": "all/**",
+          "description": "Pattern for files that should have tests scaffolded. (Watch out for infinite loops when using '**')"
         },
         "qassistant.testFileExtensionReplacement": {
           "type": "string",
           "default": "_test.$1",
           "description": "Pattern to replace file extension with when creating test file. (Use $1 for tested file's extension)"
+        },
+        "qassistant.openTestFileOnCreation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether QAssistant should open test file in editor on creation."
+        },
+        "qassistant.testFileLocation": {
+          "type": "string",
+          "enum": [
+            "parallel",
+            "adjacent"
+          ],
+          "default": "parallel",
+          "description": "Where test files should live. Parallel will create a mirrored folder for test files, while adjacent will place tests next to the file its testing."
         }
       }
     }
