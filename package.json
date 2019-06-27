@@ -47,6 +47,21 @@
           ],
           "default": "parallel",
           "description": "Where test files should live. Parallel will create a mirrored folder for test files, while adjacent will place tests next to the file its testing."
+        },
+        "qassistant.testFileHeader": {
+          "type": "string",
+          "default": "# frozen_string_literal: true",
+          "description": "Header to include at the top of every test file (eg. helper imports, linter rules, etc)."
+        },
+        "qassistant.testFileSuiteOpening": {
+          "type": "string",
+          "default": "class $?",
+          "description": "Suite definition at start of test file (use $? for Pascal case test file name)."
+        },
+        "qassistant.testFileSuiteClosing": {
+          "type": "string",
+          "default": "end",
+          "description": "Define closing of suite (eg. closing bracket, end, etc)."
         }
       }
     }

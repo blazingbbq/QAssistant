@@ -15,15 +15,13 @@ export module FileLocatorService {
     const { path } = uri;
     const root = rootDirectory().uri.path;
 
-    const extensionPattern: RegExp = /\.([^\.]+)$/;
-
     var testFilePath =
       root +
       replaceOrInsertAt<string>(
         path
           .replace(root, '')
           .replace(
-            extensionPattern,
+            extensionPattern(),
             ConfigService.TestFileExtensionReplacement.value,
           )
           .split('/'),
@@ -33,8 +31,6 @@ export module FileLocatorService {
           : -1,
         'test',
       ).join('/');
-
-    console.log(testFilePath);
 
     return vscode.Uri.file(testFilePath);
   }
@@ -46,6 +42,10 @@ export module FileLocatorService {
       throw new Error('No workspace root defined.');
     }
     return workspaceFolders[0];
+  }
+
+  export function extensionPattern() {
+    return /\.([^\.]+)$/;
   }
 }
 

@@ -53,4 +53,16 @@ export module ConfigService {
       ADJACENT: 'adjacent',
     };
   }
+
+  export class TestFileHeader extends ConfigSetting {
+    static CONFIG_NAME = 'testFileHeader';
+  }
+
+  export class TestFileSuiteOpening extends ConfigSetting {
+    static CONFIG_NAME = 'testFileSuiteOpening';
+  }
+
+  export class TestFileSuiteClosing extends ConfigSetting {
+    static CONFIG_NAME = 'testFileSuiteClosing';
+  }
 }

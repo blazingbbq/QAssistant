@@ -69,7 +69,11 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
 }
 
 function createTestFile(filePath: string) {
-  const content = TemplateService.newFile(filePath);
+  const relativeFilePath = filePath.replace(
+    FileLocatorService.rootDirectory().uri.path,
+    '',
+  );
+  const content = TemplateService.newFile(relativeFilePath);
   const dirName = path.dirname(filePath);
 
   mkdirp(dirName, err => {
