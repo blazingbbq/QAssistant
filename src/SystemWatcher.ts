@@ -11,7 +11,6 @@ enum OVERWRITE {
 
 export function init() {
   var fileSystemWatcher = newFileSystemWatcher();
-
   registerListeners(fileSystemWatcher);
 
   ConfigService.FileToTestPattern.onChange(() => {
@@ -66,13 +65,104 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
 
     fs.unlinkSync(filePath);
   });
+
+  var linesChanged = {
+    from: -1,
+    to: -1,
+  };
+
+  const updateLinesChanged = (line: number) => {
+    if (linesChanged.from < 0 || line < linesChanged.from) {
+      linesChanged.from = line;
+    }
+    if (linesChanged.to < 0 || line > linesChanged.to) {
+      linesChanged.to = line;
+    }
+  };
+
+  // TODO: Better change tracking. Doesn't properly track deleted lines
+  vscode.workspace.onDidChangeTextDocument(
+    ({ contentChanges }: vscode.TextDocumentChangeEvent) => {
+      contentChanges.forEach(change => {
+        if (!change.text) {
+          return;
+        }
+
+        if (change.range.isSingleLine) {
+          updateLinesChanged(change.range.start.line);
+        } else {
+          updateLinesChanged(change.range.start.line);
+          updateLinesChanged(change.range.end.line);
+        }
+      });
+    },
+  );
+
+  vscode.workspace.onDidSaveTextDocument(event => {
+    if (linesChanged.from < 0 || linesChanged.to < 0) {
+      return;
+    }
+
+    const edits = event.getText(
+      new vscode.Range(linesChanged.from, 0, linesChanged.to, Number.MAX_VALUE),
+    );
+    const regexp = new RegExp(
+      'def $?'.replace('$?', '(?<FUNCTION_NAME>.+)'),
+      'gmi',
+    );
+    const testFile = FileLocatorService.getTestFile(event.uri).path;
+    // testFileUri.
+
+    var m: any;
+    while ((m = regexp.exec(edits))) {
+      const newFunctionTemplate = TemplateService.newFunction(m[1]);
+
+      fs.readFile(testFile, 'utf8', (err, data) => {
+        if (err) {
+          throw err;
+        }
+
+        const matcher = TemplateService.newFileMatcher(
+          getRelativeFilePath(testFile),
+        );
+
+        if (matcher === undefined) {
+          return;
+        }
+
+        const testFileChunks = matcher.exec(data);
+
+        if (
+          testFileChunks === null ||
+          testFileChunks[1] === null ||
+          testFileChunks[2] === null ||
+          testFileChunks[3] === null ||
+          testFileChunks[4] === null
+        ) {
+          return;
+        }
+
+        fs.writeFile(
+          testFile,
+          `${testFileChunks[1]}
+${testFileChunks[2]}
+${testFileChunks[3]}
+
+${newFunctionTemplate}
+${testFileChunks[4]}
+`,
+          () => {},
+        );
+      });
+    }
+
+    linesChanged.from = -1;
+    linesChanged.to = -1;
+  });
 }
 
 function createTestFile(filePath: string) {
-  const relativeFilePath = filePath.replace(
-    FileLocatorService.rootDirectory().uri.path,
-    '',
-  );
+  const relativeFilePath = getRelativeFilePath(filePath);
   const content = TemplateService.newFile(relativeFilePath);
   const dirName = path.dirname(filePath);
 
@@ -89,4 +179,8 @@ function createTestFile(filePath: string) {
       }
     });
   });
+}
+
+function getRelativeFilePath(filePath: string) {
+  return filePath.replace(FileLocatorService.rootDirectory().uri.path, '');
 }

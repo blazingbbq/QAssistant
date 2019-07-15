@@ -65,4 +65,8 @@ export module ConfigService {
   export class TestFileSuiteClosing extends ConfigSetting {
     static CONFIG_NAME = 'testFileSuiteClosing';
   }
+
+  export class NewFunctionMatcher extends ConfigSetting {
+    static CONFIG_NAME = 'newFunctionMatcher';
+  }
 }
