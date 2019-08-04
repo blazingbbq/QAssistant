@@ -49,13 +49,11 @@ export module TemplateService {
   }
 
   function scaffoldNewFunction(functionName: string) {
-    const newFunctionTestOpening = "\ttest('::$? <TEST DESCRIPTION>') do".replace(
+    const newFunctionTemplate = ConfigService.NewFunctionTemplate.value.replace(
       '$?',
       functionName,
     );
-    const newFunctionTestContent = '\t\t# auto generated test stub';
-    const newFunctionTestClosing = '\tend';
 
-    return `\n${newFunctionTestOpening}\n${newFunctionTestContent}\n${newFunctionTestClosing}\n`;
+    return `\n${newFunctionTemplate}\n`;
   }
 }

@@ -69,4 +69,8 @@ export module ConfigService {
   export class NewFunctionMatcher extends ConfigSetting {
     static CONFIG_NAME = 'newFunctionMatcher';
   }
+
+  export class NewFunctionTemplate extends ConfigSetting {
+    static CONFIG_NAME = 'newFunctionTemplate';
+  }
 }

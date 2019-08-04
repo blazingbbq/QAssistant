@@ -66,7 +66,12 @@
         "qassistant.newFunctionMatcher": {
           "type": "string",
           "default": "def $?",
-          "description": "RegExp matcher for new function definition (use $? to capture the new function's name)."
+          "description": "Matcher for new function definitions (use $? to capture the new function's name)."
+        },
+        "qassistant.newFunctionTemplate": {
+          "type": "string",
+          "default": "\ttest('::$? <TEST DESCRIPTION>') do\n\t\t# auto generated test stub\n\tend",
+          "description": "Template for new functions (use $? for function's name)."
         }
       }
     }
