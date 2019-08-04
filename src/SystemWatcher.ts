@@ -111,50 +111,53 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
       'gmi',
     );
     const testFile = FileLocatorService.getTestFile(event.uri).path;
-    // testFileUri.
 
-    var m: any;
-    while ((m = regexp.exec(edits))) {
-      const newFunctionTemplate = TemplateService.newFunction(m[1]);
+    fs.readFile(testFile, 'utf8', (err, data) => {
+      if (err) {
+        throw err;
+      }
 
-      fs.readFile(testFile, 'utf8', (err, data) => {
-        if (err) {
-          throw err;
-        }
+      const matcher = TemplateService.newFileMatcher(
+        getRelativeFilePath(testFile),
+      );
 
-        const matcher = TemplateService.newFileMatcher(
-          getRelativeFilePath(testFile),
-        );
+      if (matcher === undefined) {
+        return;
+      }
 
-        if (matcher === undefined) {
-          return;
-        }
+      const testFileChunks = matcher.exec(data);
 
-        const testFileChunks = matcher.exec(data);
+      if (
+        testFileChunks === null ||
+        testFileChunks[1] === null ||
+        testFileChunks[2] === null
+      ) {
+        return;
+      }
 
-        if (
-          testFileChunks === null ||
-          testFileChunks[1] === null ||
-          testFileChunks[2] === null ||
-          testFileChunks[3] === null ||
-          testFileChunks[4] === null
-        ) {
-          return;
-        }
+      var newTestFileContent = '';
 
-        fs.writeFile(
-          testFile,
-          `${testFileChunks[1]}
-${testFileChunks[2]}
-${testFileChunks[3]}
+      var m: any;
+      while ((m = regexp.exec(edits))) {
+        newTestFileContent += TemplateService.newFunction(m[1]);
+      }
 
-${newFunctionTemplate}
-${testFileChunks[4]}
-`,
-          () => {},
-        );
-      });
-    }
+      if (newTestFileContent === '') {
+        return;
+      }
+
+      if (testFileChunks[1].split('\n').length > 4) {
+        newTestFileContent = '\n'.concat(newTestFileContent);
+      }
+
+      fs.writeFile(
+        testFile,
+        `${testFileChunks[1].trimRight()}${newTestFileContent.trimRight()}\n${
+          testFileChunks[2]
+        }`,
+        () => {},
+      );
+    });
 
     linesChanged.from = -1;
     linesChanged.to = -1;

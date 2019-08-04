@@ -13,21 +13,10 @@ export module TemplateService {
       return;
     }
 
-    const className = fileName
-      .replace(FileLocatorService.extensionPattern(), '')
-      .replace(/(^.|_.)/g, function(word) {
-        return word.replace('_', '').toUpperCase();
-      });
-
-    const header = ConfigService.TestFileHeader.value;
-    const suiteOpening = ConfigService.TestFileSuiteOpening.value.replace(
-      '$?',
-      className,
-    );
     const suiteClosing = ConfigService.TestFileSuiteClosing.value;
 
     return new RegExp(
-      `(?<HEADER>${header})\n(?<SUITE_OPENING>${suiteOpening})\n(?<CONTENT>.*?)\n(?<SUITE_CLOSING>${suiteClosing})`,
+      `(?<CONTENT>.*)(?<SUITE_CLOSING>${suiteClosing}\n)`,
       'gmis',
     );
   }
@@ -56,21 +45,17 @@ export module TemplateService {
     );
     const suiteClosing = ConfigService.TestFileSuiteClosing.value;
 
-    return `${header}
-${suiteOpening}
-
-${suiteClosing}
-`;
+    return `${header}\n${suiteOpening}\n\n${suiteClosing}\n`;
   }
 
   function scaffoldNewFunction(functionName: string) {
-    const newFunctionTestOpening = "test('::$? <TEST DESCRIPTION>') do".replace(
+    const newFunctionTestOpening = "\ttest('::$? <TEST DESCRIPTION>') do".replace(
       '$?',
       functionName,
     );
-    const newFunctionTestContent = '\t# auto generated test stub';
-    const newFunctionTestClosing = 'end';
+    const newFunctionTestContent = '\t\t# auto generated test stub';
+    const newFunctionTestClosing = '\tend';
 
-    return `\t${newFunctionTestOpening}\n\t${newFunctionTestContent}\n\t${newFunctionTestClosing}`;
+    return `\n${newFunctionTestOpening}\n${newFunctionTestContent}\n${newFunctionTestClosing}\n`;
   }
 }
