@@ -66,56 +66,25 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
     fs.unlinkSync(filePath);
   });
 
-  var linesChanged = {
-    from: -1,
-    to: -1,
-    update: (line: number) => {
-      if (linesChanged.from < 0 || line < linesChanged.from) {
-        linesChanged.from = line;
-      }
-      if (linesChanged.to < 0 || line > linesChanged.to) {
-        linesChanged.to = line;
-      }
-    },
-    reset: () => {
-      linesChanged.from = -1;
-      linesChanged.to = -1;
-    },
-  };
+  var existingFunctions: string[] = [];
 
-  // TODO: Better change tracking. Should track existing/changed functions.
-  vscode.workspace.onDidChangeTextDocument(
-    ({ document, contentChanges }: vscode.TextDocumentChangeEvent) => {
-      if (document.fileName.includes('/test/')) {
-        return;
+  vscode.workspace.onWillSaveTextDocument(({ document }) => {
+    fs.readFile(document.uri.fsPath, 'utf8', (err, data) => {
+      if (err) {
+        throw err;
       }
 
-      contentChanges.forEach(change => {
-        if (!change.text) {
-          return;
-        }
-
-        if (change.range.isSingleLine) {
-          linesChanged.update(change.range.start.line);
-        } else {
-          linesChanged.update(change.range.start.line);
-          linesChanged.update(change.range.end.line);
-        }
-      });
-    },
-  );
+      existingFunctions = findFunctions(data);
+    });
+  });
 
   vscode.workspace.onDidSaveTextDocument(event => {
-    if (linesChanged.from < 0 || linesChanged.to < 0) {
+    if (event.uri.fsPath.includes('/test/')) {
       return;
     }
 
-    const edits = event.getText(
-      new vscode.Range(linesChanged.from, 0, linesChanged.to, Number.MAX_VALUE),
-    );
-    const regexp = new RegExp(
-      'def $?'.replace('$?', '(?<FUNCTION_NAME>.+)'),
-      'gmi',
+    const fileContent = event.getText(
+      new vscode.Range(0, 0, Number.MAX_VALUE, Number.MAX_VALUE),
     );
     const testFile = FileLocatorService.getTestFile(event.uri).path;
 
@@ -142,16 +111,23 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
         return;
       }
 
-      var newTestFileContent = '';
+      const allFunctions = findFunctions(fileContent);
+      const newFunctions = allFunctions.filter(
+        functionName => existingFunctions.indexOf(functionName) < 0,
+      );
+      const deletedFunctions = existingFunctions.filter(
+        functionName => allFunctions.indexOf(functionName) < 0,
+      );
 
-      var m: any;
-      while ((m = regexp.exec(edits))) {
-        newTestFileContent += TemplateService.newFunction(m[1]);
-      }
-
-      if (newTestFileContent === '') {
+      if (newFunctions.length <= 0) {
         return;
       }
+
+      var newTestFileContent = '';
+
+      newFunctions.forEach(functionName => {
+        newTestFileContent += TemplateService.newFunction(functionName);
+      });
 
       if (testFileChunks[1].split('\n').length > 4) {
         newTestFileContent = '\n'.concat(newTestFileContent);
@@ -165,8 +141,6 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
         () => {},
       );
     });
-
-    linesChanged.reset();
   });
 }
 
@@ -192,4 +166,23 @@ function createTestFile(filePath: string) {
 
 function getRelativeFilePath(filePath: string) {
   return filePath.replace(FileLocatorService.rootDirectory().uri.path, '');
+}
+
+// TODO: Needs to match functions with parameters
+function findFunctions(fileContent: string) {
+  const functionNames = [];
+  const regexp = new RegExp(
+    ConfigService.NewFunctionMatcher.value.replace(
+      '$?',
+      '(?<FUNCTION_NAME>.+)',
+    ),
+    'gmi',
+  );
+  var m: any;
+
+  while ((m = regexp.exec(fileContent))) {
+    functionNames.push(m[1]);
+  }
+
+  return functionNames;
 }
