@@ -69,30 +69,37 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
   var linesChanged = {
     from: -1,
     to: -1,
+    update: (line: number) => {
+      if (linesChanged.from < 0 || line < linesChanged.from) {
+        linesChanged.from = line;
+      }
+      if (linesChanged.to < 0 || line > linesChanged.to) {
+        linesChanged.to = line;
+      }
+    },
+    reset: () => {
+      linesChanged.from = -1;
+      linesChanged.to = -1;
+    },
   };
 
-  const updateLinesChanged = (line: number) => {
-    if (linesChanged.from < 0 || line < linesChanged.from) {
-      linesChanged.from = line;
-    }
-    if (linesChanged.to < 0 || line > linesChanged.to) {
-      linesChanged.to = line;
-    }
-  };
-
-  // TODO: Better change tracking. Doesn't properly track deleted lines
+  // TODO: Better change tracking. Should track existing/changed functions.
   vscode.workspace.onDidChangeTextDocument(
-    ({ contentChanges }: vscode.TextDocumentChangeEvent) => {
+    ({ document, contentChanges }: vscode.TextDocumentChangeEvent) => {
+      if (document.fileName.includes('/test/')) {
+        return;
+      }
+
       contentChanges.forEach(change => {
         if (!change.text) {
           return;
         }
 
         if (change.range.isSingleLine) {
-          updateLinesChanged(change.range.start.line);
+          linesChanged.update(change.range.start.line);
         } else {
-          updateLinesChanged(change.range.start.line);
-          updateLinesChanged(change.range.end.line);
+          linesChanged.update(change.range.start.line);
+          linesChanged.update(change.range.end.line);
         }
       });
     },
@@ -159,8 +166,7 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
       );
     });
 
-    linesChanged.from = -1;
-    linesChanged.to = -1;
+    linesChanged.reset();
   });
 }
 
