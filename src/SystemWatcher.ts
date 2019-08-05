@@ -168,15 +168,14 @@ function getRelativeFilePath(filePath: string) {
   return filePath.replace(FileLocatorService.rootDirectory().uri.path, '');
 }
 
-// TODO: Needs to match functions with parameters
 function findFunctions(fileContent: string) {
   const functionNames = [];
   const regexp = new RegExp(
     ConfigService.NewFunctionMatcher.value.replace(
       '$?',
-      '(?<FUNCTION_NAME>.+)',
+      '(?<FUNCTION_NAME>[^(\\s]+)',
     ),
-    'gmi',
+    'gi',
   );
   var m: any;
 
