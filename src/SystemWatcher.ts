@@ -111,6 +111,8 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
         return;
       }
 
+      var fileOpening = testFileChunks[1];
+
       const allFunctions = findFunctions(fileContent);
       const newFunctions = allFunctions.filter(
         functionName => existingFunctions.indexOf(functionName) < 0,
@@ -119,8 +121,51 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
         functionName => allFunctions.indexOf(functionName) < 0,
       );
 
-      if (newFunctions.length <= 0) {
-        return;
+      if (
+        ConfigService.AutoDeleteFromTest.value &&
+        deletedFunctions &&
+        deletedFunctions.length
+      ) {
+        const functionHeaderMatcher = new RegExp(
+          ConfigService.TestHeaderMatcher.value.replace('$?', '(.+?)'),
+          'g',
+        );
+
+        const functionIndexes: {
+          name: string;
+          position: number;
+          deleted?: boolean;
+        }[] = [];
+
+        var m: any;
+        while ((m = functionHeaderMatcher.exec(fileOpening))) {
+          functionIndexes.push({ name: m[1], position: m.index });
+        }
+
+        var offset = 0;
+
+        deletedFunctions.forEach(function(deletedFunction) {
+          functionIndexes.forEach(({ name, position, deleted }, index) => {
+            if (name === deletedFunction && !deleted) {
+              fileOpening = fileOpening
+                .slice(0, position - offset)
+                .concat(
+                  functionIndexes[index + 1]
+                    ? fileOpening.slice(
+                        functionIndexes[index + 1].position - offset,
+                        Number.MAX_VALUE,
+                      )
+                    : '',
+                );
+
+              offset += functionIndexes[index + 1]
+                ? functionIndexes[index + 1].position - position
+                : 0;
+
+              functionIndexes[index].deleted = true;
+            }
+          });
+        });
       }
 
       var newTestFileContent = '';
@@ -129,13 +174,13 @@ function registerListeners(fileSystemWatcher: vscode.FileSystemWatcher) {
         newTestFileContent += TemplateService.newFunction(functionName);
       });
 
-      if (testFileChunks[1].split('\n').length > 4) {
+      if (fileOpening.split('\n').length > 4) {
         newTestFileContent = '\n'.concat(newTestFileContent);
       }
 
       fs.writeFile(
         testFile,
-        `${testFileChunks[1].trimRight()}${newTestFileContent.trimRight()}\n${
+        `${fileOpening.trimRight()}${newTestFileContent.trimRight()}\n${
           testFileChunks[2]
         }`,
         () => {},
@@ -175,7 +220,7 @@ function findFunctions(fileContent: string) {
       '$?',
       '(?<FUNCTION_NAME>[^(\\s]+)',
     ),
-    'gi',
+    'g',
   );
   var m: any;
 

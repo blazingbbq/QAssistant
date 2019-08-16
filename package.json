@@ -72,6 +72,16 @@
           "type": "string",
           "default": "\ttest('::$? <TEST DESCRIPTION>') do\n\t\t# auto generated test stub\n\tend",
           "description": "Template for new functions (use $? for function's name)."
+        },
+        "qassistant.testHeaderMatcher": {
+          "type": "string",
+          "default": "test\\(['\"]::$? .*?\\) do",
+          "description": "Matcher to locate function tests in test file (use $? for function's name)."
+        },
+        "qassistant.autoDeleteFromTest": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether QAssistant should automatically delete removed functions from test files."
         }
       }
     }

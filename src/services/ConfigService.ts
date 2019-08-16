@@ -73,4 +73,12 @@ export module ConfigService {
   export class NewFunctionTemplate extends ConfigSetting {
     static CONFIG_NAME = 'newFunctionTemplate';
   }
+
+  export class TestHeaderMatcher extends ConfigSetting {
+    static CONFIG_NAME = 'testHeaderMatcher';
+  }
+
+  export class AutoDeleteFromTest extends ConfigSetting {
+    static CONFIG_NAME = 'autoDeleteFromTest';
+  }
 }
