@@ -1,6 +1,6 @@
-# qassistant README
+# QAssistant
 
-This is the README for your extension "qassistant". After writing up a brief description, we recommend including the following sections.
+QAssistant is a VSCode extension that that automatically creates test files and scaffolds test cases. The flexible configurations allow support for multiple programming languages (see example configs below).
 
 ## Features
 
@@ -14,52 +14,32 @@ For example if there is an image subfolder under your extension project workspac
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Does not have any special dependencies.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+QAssistant contributes the following extension settings:
 
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+| Setting                                   | Description                                                                                                                                        | Type          | Default                                                                           |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------- |
+| `qassistant.fileToTestPattern`            | Pattern for files that should have tests scaffolded. (Watch out for infinite loops when using '\*\*')                                              | `string`      | `all/**`                                                                          |
+| `qassistant.testFileExtensionReplacement` | Pattern to replace file extension with when creating test file. (Use \$1 for tested file's extension)                                              | `string`      | `_test.$1`                                                                        |
+| `qassistant.openTestFileOnCreation`       | Whether QAssistant should open test file in editor on creation.                                                                                    | `boolean`     | `false`                                                                           |
+| `qassistant.testFileLocation`             | Where test files should live. Parallel will create a mirrored folder for test files, while adjacent will place tests next to the file its testing. | `string enum` | `parallel` or `adjacent`                                                          |
+| `qassistant.testFileHeader`               | Header to include at the top of every test file (eg. helper imports, linter rules, etc).                                                           | `string`      | `"# |frozen_string_literal: true"`                                                |
+| `qassistant.testFileSuiteOpening`         | Suite definition at start of test file (use \$? for Pascal case test file name).                                                                   | `string`      | `class |$?"`                                                                      |
+| `qassistant.testFileSuiteClosing`         | Define closing of suite (eg. closing bracket, end, etc).                                                                                           | `string`      | `end"`                                                                            |
+| `qassistant.newFunctionMatcher`           | Matcher for new function definitions (use \$? to capture the new function's name).                                                                 | `string`      | `def $?"`                                                                         |
+| `qassistant.newFunctionTemplate`          | Template for new functions (use \$? for function's name).                                                                                          | `string`      | `"\ttest('::$? <TEST DESCRIPTION>') | do\n\t\t# auto generated test stub\n\tend"` |
+| `qassistant.testHeaderMatcher`            | Matcher to locate function tests in test file (use \$? for function's name).                                                                       | `string`      | `test\\(['\"]::$? |.*?\\) do"`                                                    |
+| `qassistant.autoDeleteFromTest`           | Whether QAssistant should automatically delete removed functions from test files.                                                                  | `boolean`     | `true`                                                                            |
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+No automated tests to verify behavior.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release of QAssistant. [Coming soon]
