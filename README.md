@@ -1,6 +1,6 @@
 # QAssistant
 
-QAssistant is a VSCode extension that that automatically creates test files and scaffolds test cases. The flexible configurations allow support for multiple programming languages (see example configs below).
+QAssistant is a VSCode extension that automatically creates test files and scaffolds test cases. The flexible configurations allow support for multiple programming languages (see example configs below).
 
 ## Features
 
