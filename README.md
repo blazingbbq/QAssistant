@@ -4,13 +4,13 @@ QAssistant is a VSCode extension that that automatically creates test files and 
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Automatically create and delete test files:
 
-For example if there is an image subfolder under your extension project workspace:
+![Create and delete test files](images/create-delete-file-demo.gif)
 
-\!\[feature X\]\(images/feature-x.png\)
+Automatically scaffold test cases for new functions, and remove tests for deleted functions:
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![Scaffold and remove test cases](images/create-delete-function-demo.gif)
 
 ## Requirements
 
