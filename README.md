@@ -4,13 +4,13 @@ QAssistant is a VSCode extension that automatically creates test files and scaff
 
 ## Features
 
-Automatically create and delete test files:
-
-![Create and delete test files](images/create-delete-file-demo.gif)
-
 Automatically scaffold test cases for new functions, and remove tests for deleted functions:
 
 ![Scaffold and remove test cases](images/create-delete-function-demo.gif)
+
+Automatically create and delete test files:
+
+![Create and delete test files](images/create-delete-file-demo.gif)
 
 ## Requirements
 
